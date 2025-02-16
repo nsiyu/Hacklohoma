@@ -1,6 +1,6 @@
 question_creation_task:
   description: >
-    Create a unique coding question about the topic {topic} and with difficulty {difficulty} and have a story about spider-man. 
+    Create a unique coding question about the topic {topic} and difficulty {difficulty} and have a story. 
     Custom Requirements are {custom_requirements}
   expected_output: >
     The response should be a valid object that can be parsed into the specified format.
