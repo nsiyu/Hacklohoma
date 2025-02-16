@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react';
 import { ArrowLeftIcon, ShareIcon, DocumentDownloadIcon } from '@heroicons/react/outline';
 import Link from 'next/link';
 
@@ -21,7 +20,16 @@ interface FeedbackScores {
   recommended_topics: string[];
 }
 
-const InterviewFeedback = ({ feedback }: { feedback: FeedbackScores }) => {
+interface InterviewData {
+  // Add any necessary properties for the interview data
+}
+
+interface InterviewFeedbackProps {
+  feedback: FeedbackScores;
+  interviewData: InterviewData;
+}
+
+const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) => {
   const totalScore = ((feedback.correctness_score + feedback.syntax_score + 
     feedback.completeness_score + feedback.optimality_score) / 20) * 100;
 
@@ -83,7 +91,13 @@ const InterviewFeedback = ({ feedback }: { feedback: FeedbackScores }) => {
             <div className="p-6">
               <div className="text-sm font-medium text-gray-500 mb-1">Question Level</div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm font-medium">
+                <span className={`px-2.5 py-1 rounded-full text-sm font-medium ${
+                  feedback.question_difficulty.toLowerCase() === 'easy' 
+                    ? 'bg-green-100 text-green-700'
+                    : feedback.question_difficulty.toLowerCase() === 'medium'
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : 'bg-red-100 text-red-700'
+                }`}>
                   {feedback.question_difficulty}
                 </span>
               </div>

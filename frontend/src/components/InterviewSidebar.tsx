@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { InterviewQuestion, InterviewTranscriptMessage } from '@/types/Interview';
 import { QuestionRequest } from '@/types/Interview';
-import { ElevenLabsClient } from 'elevenlabs';
+
 enum Topic {
   Array = "Array",
   String = "String",
@@ -117,7 +117,13 @@ const InterviewSidebar = ({ onQuestionLoaded, questionParams, conversationId }: 
     <div className="h-full flex flex-col bg-gray-50">
       <div className="flex-1 p-6 overflow-auto">
         <div className="mb-6">
-          <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium">
+          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+            question.difficulty.toLowerCase() === 'easy' 
+              ? 'bg-green-100 text-green-700'
+              : question.difficulty.toLowerCase() === 'medium'
+              ? 'bg-yellow-100 text-yellow-700'
+              : 'bg-red-100 text-red-700'
+          }`}>
             {question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1)}
           </span>
         </div>

@@ -10,15 +10,18 @@ interface ConvAIProps {
   question: InterviewQuestion | null;
   currentCode: string;
   onConversationStart: (id: string) => void;
+  onTranscriptUpdate: (message: any) => void;
 }
 
-const ConvAI = ({ question, currentCode, onConversationStart }: ConvAIProps) => {
+const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate }: ConvAIProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [conversation, setConversation] = useState<any>(null);
   const [knowledgeBaseId, setKnowledgeBaseId] = useState<string | null>(null);
   const isConnectedRef = useRef(false);
+  const conversationRef = useRef<any>(null);
+  const [isEnding, setIsEnding] = useState(false);
 
   const client = new ElevenLabsClient({ 
     apiKey: process.env.NEXT_PUBLIC_ELEVEN_LABS_API_KEY as string 
@@ -184,7 +187,7 @@ const ConvAI = ({ question, currentCode, onConversationStart }: ConvAIProps) => 
     }
 
     try {
-      const conversation = await Conversation.startSession({
+      const newConversation = await Conversation.startSession({
         agentId: process.env.NEXT_PUBLIC_AGENT_ID as string,
         onConnect: () => {
           console.log('Connected to conversation');
@@ -193,10 +196,9 @@ const ConvAI = ({ question, currentCode, onConversationStart }: ConvAIProps) => 
           setIsSpeaking(true);
         },
         onDisconnect: async () => {
-          await endConversation();
+          console.log('Disconnecting conversation');
           setIsConnected(false);
           setIsSpeaking(false);
-          await removeFromKnowledgeBase();
         },
         onError: (error) => {
           console.log(error);
@@ -207,9 +209,9 @@ const ConvAI = ({ question, currentCode, onConversationStart }: ConvAIProps) => 
         }
       });
       
-      const conversationId = conversation.getId();
+      const conversationId = newConversation.getId();
       console.log('Conversation started with ID:', conversationId);
-      setConversation(conversation);
+      setConversationAndRef(newConversation);
       onConversationStart(conversationId);
 
     } catch (error) {
@@ -232,42 +234,70 @@ const ConvAI = ({ question, currentCode, onConversationStart }: ConvAIProps) => 
   }
 
   async function endConversation() {
-    if (!conversation) return;
+    console.log('Ending conversation');
+    setIsEnding(true);
+    const currentConversation = conversationRef.current;
+    if (!currentConversation) {
+      console.log('No conversation found');
+      return;
+    }
     
     try {
-      await conversation.endSession();
+      let transcriptData = null;
+      const conversationId = currentConversation.getId();
+      console.log('Conversation ID:', conversationId);
+
       
-      console.log('=== Interview Session Summary ===');
-      console.log('\nQuestion:', {
-        title: question?.title,
-        description: question?.description,
-        difficulty: question?.difficulty,
-        examples: question?.examples,
-        constraints: question?.constraints
-      });
-      
-      console.log('\nFinal Code:', currentCode);
-      
-      if (conversation.getId()) {
-        try {
-          const finalClient = new ElevenLabsClient({ 
-            apiKey: process.env.NEXT_PUBLIC_ELEVEN_LABS_API_KEY as string 
-          });
-          const response = await finalClient.conversationalAi.getConversation(conversation.getId());
-          if (response && response.transcript) {
-            console.log('\nFinal Transcript:', response.transcript);
+
+      try {
+        await client.conversationalAi.updateAgent(
+          process.env.NEXT_PUBLIC_AGENT_ID as string,
+          {
+            conversation_config: {
+              agent: {
+                prompt: {
+                  knowledge_base: []
+                }
+              }
+            }
           }
-        } catch (error) {
-          console.error('Error fetching final transcript:', error);
-        }
+        );
+      } catch (error) {
+        console.error('Error updating agent:', error);
       }
 
-      setConversation(null);
       await removeFromKnowledgeBase();
+
+      const interviewData = {
+        question: {
+          title: question?.title,
+          description: question?.description,
+          difficulty: question?.difficulty,
+          examples: question?.examples,
+          constraints: question?.constraints
+        },
+        code: currentCode,
+        transcript: conversationId
+      };
+
+      console.log('Interview data:', interviewData);
+      const encodedData = encodeURIComponent(JSON.stringify(interviewData));
+      
+      await currentConversation.endSession();
+      setConversationAndRef(null);
+      
+      window.location.href = `/feedback?data=${encodedData}`;
     } catch (error) {
       console.error('Error ending conversation:', error);
+    } finally {
+      setIsEnding(false);
     }
   }
+
+  const setConversationAndRef = (newConversation: any) => {
+    setConversation(newConversation);
+    conversationRef.current = newConversation;
+  };
 
   return (
     <>
@@ -298,6 +328,17 @@ const ConvAI = ({ question, currentCode, onConversationStart }: ConvAIProps) => 
               )}
             </button>
           </div>
+        </div>
+      )}
+      
+      {isConnected && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <button
+            onClick={endConversation}
+            className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200"
+          >
+            End Interview
+          </button>
         </div>
       )}
     </>
