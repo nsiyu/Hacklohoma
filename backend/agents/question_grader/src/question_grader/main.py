@@ -2,9 +2,9 @@
 import sys
 import warnings
 
-from datetime import datetime
 
 from question_grader.crew import QuestionGrader
+from question_grader.types import Example, CodingQuestionRequest
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -65,4 +65,18 @@ def test():
         raise Exception(f"An error occurred while testing the crew: {e}")
 
 
-# def create_report()
+def create_report(Question: CodingQuestionRequest, transcript: str):
+    examples_list_dict = [example.model_dump() for example in Question.examples]
+    inputs = {
+        "title": Question.title,
+        "description": Question.description,
+        "difficulty": Question.difficulty,
+        "examples": examples_list_dict,
+        "constraints": Question.constraints,
+    }
+
+    try:
+        result = QuestionGrader().crew().kickoff(inputs=inputs)
+        return result
+    except Exception as e:
+        raise Exception(f"An error occurred while creating the question: {e}")
