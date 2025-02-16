@@ -53,7 +53,7 @@ interface InterviewData {
   question: {
     title: string;
     description: string;
-    difficulty: "medium";
+    difficulty: "easy";
     examples: {
       input: string;
       output: string;
@@ -100,7 +100,7 @@ const FeedbackPage = () => {
             code: data.code,
             question: {
               ...data.question,
-              difficulty: "medium"
+              difficulty: "easy"
             },
             transcripts: data.transcript.map(transcript => ({
               message: transcript.message,
