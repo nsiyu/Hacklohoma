@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-import uuid
 from dotenv import load_dotenv
 import json
 import logging

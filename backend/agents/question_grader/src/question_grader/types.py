@@ -29,7 +29,7 @@ class Transcript(BaseModel):
     role: Optional[str]
     time_in_call_secs: Optional[str]
     tool_calls: Optional[str]
-    tool_results: Optional[str]
+    tool_results: List
 
 
 class GradeRequest(BaseModel):
