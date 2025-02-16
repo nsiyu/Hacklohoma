@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import sys
 import warnings
+from typing import List
 
 
 from question_grader.crew import QuestionGrader
-from question_grader.types import Example, CodingQuestionRequest
+from question_grader.types import CodingQuestionRequest, Transcript
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -65,15 +66,25 @@ def test():
         raise Exception(f"An error occurred while testing the crew: {e}")
 
 
-def create_report(Question: CodingQuestionRequest, transcript: str):
+def create_report(
+    code: str, Question: CodingQuestionRequest, transcript: List[Transcript]
+):
+
+    def format_transcripts(transcripts: List[Transcript]) -> str:
+        return "\n".join(
+            f"role: {t.role or 'N/A'} message: {t.message or 'N/A'}"
+            for t in transcripts
+        )
+
     examples_list_dict = [example.model_dump() for example in Question.examples]
     inputs = {
+        "code": code,
         "title": Question.title,
         "description": Question.description,
         "difficulty": Question.difficulty,
         "examples": examples_list_dict,
         "constraints": Question.constraints,
-        "transcript": transcript,
+        "transcript": format_transcripts(transcript),
     }
 
     try:

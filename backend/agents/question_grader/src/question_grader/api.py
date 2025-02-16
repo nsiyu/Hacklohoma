@@ -1,12 +1,15 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from .main import create_question
-from .parsers import CodingQuestionGeneratorAgentModel, CodingQuestion
+
 import uuid
 from dotenv import load_dotenv
 import json
 import logging
 from fastapi.middleware.cors import CORSMiddleware
+
+from .main import create_report
+from .parsers import RecruiterFeedback
+from .types import GradeRequest
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -30,41 +33,25 @@ class QuestionRequest(BaseModel):
     custom_requirements: str | None = None
 
 
-@app.post("/create-question", response_model=CodingQuestion)
-async def generate_question(request: QuestionRequest):
+@app.post("/grade-interview", response_model=RecruiterFeedback)
+async def generate_question(request: GradeRequest):
     try:
-        crew_output = create_question(
-            topic=request.topic,
-            difficulty=request.difficulty,
-            custom_requirements=request.custom_requirements,
-        )
+        crew_output = create_report(request.code, request.question, request.transcripts)
+
         logger.debug(f"Crew output type: {type(crew_output)}")
 
         if (
             hasattr(crew_output, "tasks_output")
             and crew_output.tasks_output
-            and crew_output.tasks_output[0].pydantic
+            and crew_output.tasks_output[2].pydantic
         ):
-            question_generation_task_output: CodingQuestionGeneratorAgentModel = (
-                crew_output.tasks_output[0].pydantic
-            )
+            report: RecruiterFeedback = crew_output.tasks_output[2].pydantic
         else:
             raise HTTPException(500, "Error with question generation")
 
-        logger.debug(
-            f"Question Generation Task Output: {question_generation_task_output}"
-        )
+        logger.debug(f"Report Task Output: {report}")
 
-        question = CodingQuestion(
-            title=question_generation_task_output.title,
-            description=question_generation_task_output.description,
-            difficulty=question_generation_task_output.difficulty,
-            examples=question_generation_task_output.examples,
-            constraints=question_generation_task_output.constraints,
-            id=str(uuid.uuid4()),
-        )
-
-        return question
+        return report
 
     except json.JSONDecodeError as e:
         logger.error(f"JSON parsing error: {e}")
