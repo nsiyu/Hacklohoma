@@ -98,7 +98,7 @@ def create_question(topic: str, difficulty: str, custom_requirements: str = None
     inputs = {
         "topic": topic,
         "difficulty": difficulty,
-        "code": custom_requirements,
+        "custom_requirements": custom_requirements,
     }
 
     try:
