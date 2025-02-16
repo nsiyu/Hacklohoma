@@ -46,7 +46,7 @@ strengths_feedback_task:
 
     The feedback should include relevant info relating to the problem and the candidate submitted code. 
     The feedback should include:
-    key_strengths: A list of strings for candidate key strengths (list size between 0 to 5, each less than 3 words) For example: Problem Understanding or Code Organization. If the candidate has almost no code written that it's not possible to see their areas of strength then have an empty list.
+    key_strengths: A list of strings for candidate key strengths (list size between 0 to 5, each less than 3 words) For example: Problem Understanding or Code Organization. If the candidate has almost no code written making it not possible to see their areas of strength then return an empty list for their key_strenghts.
     areas_to_focus: A list of strings for areas the candidate should focus on (list size between 1 to 5, each less than 3 words). For example: Edge Case Handling or Solution Planning.
     recommended_practice_topics: A list of for recommended practice topics for the candidate (list size between 1 to 5, each less than 3 words). For example: Two-Pointers or Array Manipulation. 
     improvement_feedback_plan: A list of strings of a step by step plan to improve with each list item being a step (list size between 1 to 5)

@@ -25,8 +25,8 @@ class CodeFeedback(BaseModel):
 
 class EngineerFuturePlanFeedback(BaseModel):
     key_strengths: List[str] = Field(
-        description="The areas of the user strength each being less or equal to 23 words",
-        min_length=1,
+        description="The areas of the user strength each being less or equal to 3 words",
+        min_length=0,
         max_length=5,
     )
 
