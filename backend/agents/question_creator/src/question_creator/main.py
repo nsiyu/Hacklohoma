@@ -83,7 +83,7 @@ def create_question(topic: str, difficulty: str, custom_requirements: str = None
         raise Exception(f"An error occurred while creating the question: {e}")
 
 
-def create_question(title: str, description: str, difficulty: str, examples: List[str]):
+def create_question(topic: str, constraints: str, custom_requirements: str = None):
     """
     Create a question with custom parameters.
 
@@ -96,10 +96,9 @@ def create_question(title: str, description: str, difficulty: str, examples: Lis
         dict: The created question in JSON format
     """
     inputs = {
-        "question": topic,
-        "constraints": difficulty,
+        "topic": topic,
+        "constraints": constraints,
         "code": custom_requirements,
-        "transcript": transcript,
     }
 
     try:
