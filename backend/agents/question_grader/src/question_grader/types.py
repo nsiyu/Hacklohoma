@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 
 
 class Example(BaseModel):
@@ -9,8 +9,30 @@ class Example(BaseModel):
 
 
 class CodingQuestionRequest(BaseModel):
-    title: str = Field(description="Title of the coding question")
-    description: str = Field(description="Detailed description of the problem")
-    difficulty: str = Field(description="Difficulty level: easy, medium, or hard")
-    examples: List[Example] = Field(description="List of example cases")
-    constraints: List[str] = Field(description="List of constraints for the problem")
+    title: Optional[str] = Field(description="Title of the coding question")
+    description: Optional[str] = Field(
+        description="Detailed description of the problem"
+    )
+    difficulty: Optional[str] = Field(
+        description="Difficulty level: easy, medium, or hard"
+    )
+    examples: Optional[List[Example]] = Field(description="List of example cases")
+    constraints: Optional[List[str]] = Field(
+        description="List of constraints for the problem"
+    )
+
+
+class Transcript(BaseModel):
+    conversation_turn_metrics: Optional[str]
+    feedback: Optional[str]
+    message: Optional[str]
+    role: Optional[str]
+    time_in_call_secs: Optional[str]
+    tool_calls: Optional[str]
+    tool_results: Optional[str]
+
+
+class GradeRequest(BaseModel):
+    code: str
+    question: CodingQuestionRequest
+    transcripts: List[Transcript]

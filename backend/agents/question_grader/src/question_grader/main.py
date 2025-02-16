@@ -73,6 +73,7 @@ def create_report(Question: CodingQuestionRequest, transcript: str):
         "difficulty": Question.difficulty,
         "examples": examples_list_dict,
         "constraints": Question.constraints,
+        "transcript": transcript,
     }
 
     try:
