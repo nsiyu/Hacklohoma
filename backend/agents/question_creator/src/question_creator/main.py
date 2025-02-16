@@ -83,7 +83,7 @@ def create_question(topic: str, difficulty: str, custom_requirements: str = None
         raise Exception(f"An error occurred while creating the question: {e}")
 
 
-def create_question(topic: str, constraints: str, custom_requirements: str = None):
+def create_question(topic: str, difficulty: str, custom_requirements: str = None):
     """
     Create a question with custom parameters.
 
@@ -97,7 +97,7 @@ def create_question(topic: str, constraints: str, custom_requirements: str = Non
     """
     inputs = {
         "topic": topic,
-        "constraints": constraints,
+        "difficulty": difficulty,
         "code": custom_requirements,
     }
 
