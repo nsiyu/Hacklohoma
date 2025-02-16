@@ -22,6 +22,7 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
   const isConnectedRef = useRef(false);
   const conversationRef = useRef<any>(null);
   const [isEnding, setIsEnding] = useState(false);
+  const isEndingRef = useRef(false);
 
   const client = new ElevenLabsClient({ 
     apiKey: process.env.NEXT_PUBLIC_ELEVEN_LABS_API_KEY as string 
@@ -169,7 +170,7 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
     }
   }
 
-  async function startConversation() {
+  const startConversation = async () => {
     setIsLoading(true);
     
     const hasPermission = await requestMicrophonePermission();
@@ -197,11 +198,35 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
         },
         onDisconnect: async () => {
           console.log('Disconnecting conversation');
+          if (!isEndingRef.current) {
+            await endConversation();
+            return;
+          }
           setIsConnected(false);
           setIsSpeaking(false);
+          
+          // Get the data ready for redirection
+          const conversationId = conversationRef.current?.getId();
+          if (conversationId) {
+            const interviewData = {
+              question: {
+                title: question?.title,
+                description: question?.description,
+                difficulty: question?.difficulty,
+                examples: question?.examples,
+                constraints: question?.constraints
+              },
+              code: currentCode,
+              transcript: conversationId
+            };
+            
+            console.log('Redirecting with interview data:', interviewData);
+            const encodedData = encodeURIComponent(JSON.stringify(interviewData));
+            window.location.href = `/feedback?data=${encodedData}`;
+          }
         },
         onError: (error) => {
-          console.log(error);
+          console.error('Conversation error:', error);
           alert('An error occurred during the conversation');
         },
         onModeChange: ({ mode }) => {
@@ -234,21 +259,37 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
   }
 
   async function endConversation() {
-    console.log('Ending conversation');
-    setIsEnding(true);
+    console.log('Starting end conversation process');
     const currentConversation = conversationRef.current;
     if (!currentConversation) {
       console.log('No conversation found');
       return;
     }
-    
+
+    // Set the ending flags first, before any async operations
+    setIsEnding(true);
+    isEndingRef.current = true;
+
     try {
-      let transcriptData = null;
       const conversationId = currentConversation.getId();
-      console.log('Conversation ID:', conversationId);
+      console.log('Ending conversation ID:', conversationId);
 
-      
+      const interviewData = {
+        question: {
+          title: question?.title,
+          description: question?.description,
+          difficulty: question?.difficulty,
+          examples: question?.examples,
+          constraints: question?.constraints
+        },
+        code: currentCode,
+        transcript: conversationId
+      };
 
+      console.log('Prepared interview data:', interviewData);
+      const encodedData = encodeURIComponent(JSON.stringify(interviewData));
+
+      // Clean up knowledge base
       try {
         await client.conversationalAi.updateAgent(
           process.env.NEXT_PUBLIC_AGENT_ID as string,
@@ -267,29 +308,18 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
       }
 
       await removeFromKnowledgeBase();
-
-      const interviewData = {
-        question: {
-          title: question?.title,
-          description: question?.description,
-          difficulty: question?.difficulty,
-          examples: question?.examples,
-          constraints: question?.constraints
-        },
-        code: currentCode,
-        transcript: conversationId
-      };
-
-      console.log('Interview data:', interviewData);
-      const encodedData = encodeURIComponent(JSON.stringify(interviewData));
       
+      // End the session
+      console.log('Ending session...');
       await currentConversation.endSession();
       setConversationAndRef(null);
-      
+
+      // Redirect immediately after ending the session
+      console.log('Redirecting to feedback page...');
       window.location.href = `/feedback?data=${encodedData}`;
     } catch (error) {
-      console.error('Error ending conversation:', error);
-    } finally {
+      console.error('Error in end conversation process:', error);
+      isEndingRef.current = false;
       setIsEnding(false);
     }
   }
