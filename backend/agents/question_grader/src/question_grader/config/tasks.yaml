@@ -59,8 +59,8 @@ strengths_feedback_task:
 feedback_generation_task:
   description: >
     Use the software engineer interviewer's scoring and the interview transcript to provide an interview report.
-    Provide the same numerical scores provided by the software engineer interviewer and also provide text summaries for overall interview feedback, candidate's behavioral and communication skills feedback,
-    and interviewer's feedback for how the candidate can improve. Keep your summaries to less than 4 sentences.
+    Provide the same numerical scores and future recommendation feedback provided by the software engineer interviewer. You should provide text summaries for overall interview feedback and candidate's behavioral and communication skills feedback.
+    Keep your summaries to less than 4 sentences.
 
     TRANSCRIPT BEING----
     {transcript}

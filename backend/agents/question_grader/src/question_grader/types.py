@@ -16,12 +16,8 @@ class CodingQuestionRequest(BaseModel):
     difficulty: Optional[str] = Field(
         description="Difficulty level: easy, medium, or hard"
     )
-    examples: Optional[List[Example]] = Field(
-        default_factory=list
-    )  # ✅ Ensures list parsing
-    constraints: Optional[List[str]] = Field(
-        default_factory=list
-    )  # ✅ Ensures list parsing
+    examples: Optional[List[Example]] = Field(default_factory=list)
+    constraints: Optional[List[str]] = Field(default_factory=list)
 
 
 class Transcript(BaseModel):
@@ -30,8 +26,8 @@ class Transcript(BaseModel):
     message: Optional[str] = None
     role: Optional[str] = None
     time_in_call_secs: Optional[int] = None
-    tool_calls: Optional[List] = None  # ✅ Allow None
-    tool_results: Optional[List] = None  # ✅ Allow None
+    tool_calls: Optional[List] = None
+    tool_results: Optional[List] = None
 
 
 class GradeRequest(BaseModel):

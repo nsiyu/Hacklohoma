@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 
 from .main import create_question
 from .parsers import CodingQuestionGeneratorAgentModel, CodingQuestion
+from .types import QuestionRequest
 import uuid
 from dotenv import load_dotenv
 import json
@@ -23,12 +23,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],
 )
-
-
-class QuestionRequest(BaseModel):
-    topic: str
-    difficulty: str = "medium"
-    custom_requirements: str | None = None
 
 
 @app.post("/create-question", response_model=CodingQuestion)
