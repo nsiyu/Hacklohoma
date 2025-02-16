@@ -23,16 +23,16 @@ class CodingQuestionRequest(BaseModel):
 
 
 class Transcript(BaseModel):
-    conversation_turn_metrics: Optional[str]
-    feedback: Optional[str]
-    message: Optional[str]
-    role: Optional[str]
-    time_in_call_secs: Optional[str]
-    tool_calls: Optional[str]
-    tool_results: List
+    conversation_turn_metrics: Optional[str] = None
+    feedback: Optional[str] = None
+    message: Optional[str] = None
+    role: Optional[str] = None
+    time_in_call_secs: Optional[str] = None
+    tool_calls: Optional[str] = None
+    tool_results: Optional[List] = None
 
 
 class GradeRequest(BaseModel):
     code: str
     question: CodingQuestionRequest
-    transcripts: List[Transcript]
+    transcript: List[Transcript]
