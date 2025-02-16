@@ -12,6 +12,7 @@ enum Topic {
   Greedy = "Greedy",
   DynamicProgramming = "Dynamic Programming",
 }
+
 const fetchQuestion = async (params: QuestionRequest) => {
   try {
     const response = await fetch('http://localhost:8000/create-question', {
