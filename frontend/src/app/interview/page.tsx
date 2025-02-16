@@ -7,6 +7,7 @@ import Terminal from '@/components/InterviewTerminal';
 import InterviewSidebar from '@/components/InterviewSidebar';
 import ConvAI from '@/components/ConvAI';
 import { InterviewQuestion } from '@/types/Interview';
+
 enum Topic {
   Array = "Array",
   String = "String",
@@ -15,6 +16,7 @@ enum Topic {
   Greedy = "Greedy",
   DynamicProgramming = "Dynamic Programming",
 }
+
 const ResizeHandle = ({ className = '', ...props }) => {
   return (
     <PanelResizeHandle 

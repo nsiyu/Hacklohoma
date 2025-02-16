@@ -53,7 +53,7 @@ interface InterviewData {
   question: {
     title: string;
     description: string;
-    difficulty: "medium";
+    difficulty: "easy";
     examples: {
       input: string;
       output: string;

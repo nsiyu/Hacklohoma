@@ -196,7 +196,16 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
 
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Improvement Plan</h2>
-              <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">{feedback.software_engineer_future_plan_feedback.improvement_feedback_plan}</p>
+              <ul className="space-y-3">
+                {feedback.software_engineer_future_plan_feedback.improvement_feedback_plan.map((item, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-sm font-medium mr-3">
+                      {index + 1}
+                    </span>
+                    <span className="text-gray-600">{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
