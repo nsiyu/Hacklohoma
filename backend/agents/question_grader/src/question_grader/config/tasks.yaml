@@ -46,7 +46,7 @@ strengths_feedback_task:
 
     The feedback should include relevant info relating to the problem and the candidate submitted code. 
     The feedback should include:
-    key_strengths: A list of strings for candidate key strengths (list size between 1 to 5, each less than 3 words) For example: Problem Understanding or Code Organization. 
+    key_strengths: A list of strings for candidate key strengths (list size between 0 to 5, each less than 3 words) For example: Problem Understanding or Code Organization. If the candidate has almost no code written that it's not possible to see their areas of strength then have an empty list.
     areas_to_focus: A list of strings for areas the candidate should focus on (list size between 1 to 5, each less than 3 words). For example: Edge Case Handling or Solution Planning.
     recommended_practice_topics: A list of for recommended practice topics for the candidate (list size between 1 to 5, each less than 3 words). For example: Two-Pointers or Array Manipulation. 
     improvement_feedback_plan: A list of strings of a step by step plan to improve with each list item being a step (list size between 1 to 5)
@@ -59,6 +59,15 @@ strengths_feedback_task:
 feedback_generation_task:
   description: >
     Use the software engineer interviewer's scoring and the interview transcript to provide an interview report.
+    Here is how to understand each numerical score of the software engingeer interviewer. 
+    correctness_score: Correctness of their algorithm to solve the problem.
+    syntax_score: Correctness of their code syntax respective of the programming language. 
+    completeness_score: completness of the code to be able to run and solve the problem.
+    optimality_score: how optimal their algorithm time and space complexity is. 
+    key_strengths: Key strengths of the candidate code. 
+    areas_to_focus: Areas the candidate is weak in and should work on.
+    recommended_practice_topics: topics to practice next.
+    improvement_feedback_plan: a plan to improve.
     Provide the same numerical scores and future recommendation feedback provided by the software engineer interviewer. You should provide text summaries for overall interview feedback and candidate's behavioral and communication skills feedback.
     Keep your summaries to less than 4 sentences.
 

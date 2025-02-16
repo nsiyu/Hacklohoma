@@ -1,3 +1,6 @@
+from pydantic import BaseModel
+
+
 class QuestionRequest(BaseModel):
     topic: str
     difficulty: str = "medium"
