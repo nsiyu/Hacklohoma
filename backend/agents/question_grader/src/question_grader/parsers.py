@@ -50,12 +50,11 @@ class EngineerFuturePlanFeedback(BaseModel):
 
 
 class RecruiterFeedback(BaseModel):
-
     software_engineer_code_feedback: CodeFeedback = Field(
         description="Numerical scores of the software engineer interviewer's feedback."
     )
 
-    software_engineer_subjective_feedback: EngineerFuturePlanFeedback = Field(
+    software_engineer_future_plan_feedback: EngineerFuturePlanFeedback = Field(
         description="Feedback of the software engineer interviewer for key strengths of the user, areas to focus, recommend practice topics, and improvement plan list"
     )
 

@@ -81,3 +81,29 @@ def create_question(topic: str, difficulty: str, custom_requirements: str = None
         return result
     except Exception as e:
         raise Exception(f"An error occurred while creating the question: {e}")
+
+
+def create_question(title: str, description: str, difficulty: str, examples: List[str]):
+    """
+    Create a question with custom parameters.
+
+    Args:
+        topic: The topic for the question
+        difficulty: Desired difficulty level (easy, medium, hard)
+        custom_requirements: Any additional requirements for the question
+
+    Returns:
+        dict: The created question in JSON format
+    """
+    inputs = {
+        "question": topic,
+        "constraints": difficulty,
+        "code": custom_requirements,
+        "transcript": transcript,
+    }
+
+    try:
+        result = QuestionCreator().crew().kickoff(inputs=inputs)
+        return result
+    except Exception as e:
+        raise Exception(f"An error occurred while creating the question: {e}")

@@ -5,7 +5,10 @@ description = "question_grader using crewAI"
 authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10,<3.13"
 dependencies = [
-    "crewai[tools]>=0.102.0,<1.0.0"
+    "crewai[tools]>=0.102.0,<1.0.0",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "fastapi (>=0.115.8,<0.116.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)"
 ]
 
 [project.scripts]
