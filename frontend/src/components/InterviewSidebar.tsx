@@ -67,7 +67,7 @@ const InterviewSidebar = ({ onQuestionLoaded, questionParams, conversationId }: 
       fetchInProgress.current = true;
 
       try {
-        const fetchedQuestion = await fetchQuestion(questionParams);
+        const fetchedQuestion = await fetchQuestion({...questionParams, difficulty: "Easy"});
         
         if (fetchedQuestion && fetchedQuestion.id) {
           setQuestion(fetchedQuestion);

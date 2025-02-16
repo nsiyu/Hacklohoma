@@ -16,11 +16,7 @@ type InterviewTranscriptMessage = {
   content: string;
 };
 
-enum Difficulty {
-  Easy = "Easy",
-  Medium = "Medium",
-  Hard = "Hard",
-}
+
 
 enum EngingeeringLevel {
   E1 = "E1", 
@@ -51,7 +47,7 @@ enum EngingeeringLevel {
 
 interface QuestionRequest {
   topic?: Topic;
-  difficulty?: Difficulty;
+  difficulty?: string;
   company?: string;
   engineering_level?: string; 
   custom_requiments?: string;   

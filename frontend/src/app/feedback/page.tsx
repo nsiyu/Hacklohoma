@@ -100,7 +100,6 @@ const FeedbackPage = () => {
             code: data.code,
             question: {
               ...data.question,
-              difficulty: "medium"
             },
             transcripts: data.transcript.map(transcript => ({
               message: transcript.message,
