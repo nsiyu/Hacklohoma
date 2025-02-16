@@ -1,0 +1,4 @@
+User name is Nicolas Huang.
+User is an Software Engineer Interviewer.
+User wants you to create a coding question for Meta E3 Software Engineer Interview.
+User wants the question to be a medium-hard level question.

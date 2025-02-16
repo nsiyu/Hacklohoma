@@ -1,0 +1,48 @@
+code_scoring_task:
+  description: >
+    For the coding question: {question} -- With Constraints: {constraints}.
+    Grade the user code: {code}
+    Score data structure and algorithms coding interviews in scoring categoies: correctness_score, syntax_score, completeness_score, and optimality_score.
+    when grading for correctness your main goal is to assess if the algorithm solves the question correctly and accounts for all edge cases.
+    When grading syntax you make sure all the syntax is correct for the respective coding language. You can ignore import statements and namespace specifications.
+    When grading completeness you make sure the code includes all components for it to be runable. 
+    When grading for optimality you make sure the user comes up with the most optimal solution (time and space) for the problem. You can ignore niche algorithms that have the most optimal time. 
+    So if the user has a pretty good time complexity, but there is a niche algorithm with better time complexity, don't deduct points.
+    The scores should be numerical values between 0 and 5 with 1 point granularity.
+
+  expected_output: >
+    The response should be a valid object that can be parsed into the specified format.
+    Make sure to include all required fields and follow the exact structure.
+  agent: technical_question_grader
+
+strengths_feedback_task:
+  description: >
+    For the coding question: {question} -- With Constraints: {constraints}.
+    And the user submitted code: {code}
+
+    Come up with feedback. The feedback should include relevant info relating to the problem and the user submitted code. 
+    The feedback should include:
+    key_strengths: A list of strings for user key strengths (list size between 1 to 5, each less than 3 words) For example: Problem Understanding or Code Organization. 
+    areas_to_focus: A list of strings for areas the user should focus on (list size between 1 to 5, each less than 3 words). For example: Edge Case Handling or Solution Planning.
+    recommended_practice_topics: A list of for recommended practice topics for the user (list size between 1 to 5, each less than 3 words). For example: Two-Pointers or Array Manipulation. 
+    improvement_feedback_plan: A list of strings of a step by step plan to improve with each list item being a step (list size between 1 to 5)
+
+  expected_output: >
+    The response should be a valid object that can be parsed into the specified format.
+    Make sure to include all required fields and follow the exact structure.
+  agent: technical_question_grader
+
+feedback_generation_task:
+  description: >
+    Use the software engineer interviewer's scoring and the interview transcript to provide an interview report.
+    Provide the same numerical scores provided by the software engineer interviewer and also provide text summaries for overall interview feedback, candidate's behavioral and communication skills feedback,
+    and interviewer's feedback for how the candidate can improve. Keep your summaries to less than 4 sentences.
+
+    TRANSCRIPT BEING----
+    {transcript}
+    TRANSCRIPT END----
+  expected_output: >
+    The response should be a valid object that can be parsed into the specified format.
+    Make sure to include all required fields and follow the exact structure.
+
+  agent: recruiter_agent
