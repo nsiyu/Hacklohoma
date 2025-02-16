@@ -9,7 +9,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Codem",
+  title: "Cortex",
   description: "Master Your Technical Interviews",
   icons: {
     icon: '/logos/codem.svg',

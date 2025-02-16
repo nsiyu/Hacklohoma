@@ -16,7 +16,7 @@ type Language = {
 };
 
 const companies: Company[] = [
-  { name: 'Meta', logo: '/logos/meta.svg', levels: ['E3'] },
+  { name: 'Meta', logo: '/logos/meta.svg', levels: ['Intern'] },
   { name: 'Google', logo: '/logos/google.png', levels: ['L3'] },
   { name: 'Amazon', logo: '/logos/amazon.png', levels: ['SDE I'] },
   { name: 'Apple', logo: '/logos/apple.png', levels: ['ICT2'] },
@@ -52,7 +52,7 @@ const Catalog = () => {
               height={32}
               className="w-8 h-8"
             />
-            <span className="font-semibold text-gray-900">Codem</span>
+            <span className="font-semibold text-gray-900">Cortex</span>
           </Link>
         </div>
       </header>

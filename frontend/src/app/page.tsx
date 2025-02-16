@@ -24,7 +24,7 @@ const Home = () => {
                   <path d="M15 9L13 11.5L15 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <div className="flex">
-                  <span className="text-gray-900 transition-colors duration-300">Codem</span>
+                  <span className="text-gray-900 transition-colors duration-300">Cortex</span>
                 </div>
                 <span className="absolute -inset-x-4 -inset-y-1 group-hover:bg-emerald-50 rounded-lg transition-colors duration-300 -z-10"></span>
               </Link>
