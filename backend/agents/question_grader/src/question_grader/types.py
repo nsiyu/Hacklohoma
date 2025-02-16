@@ -23,16 +23,9 @@ class CodingQuestionRequest(BaseModel):
         default_factory=list
     )  # ✅ Ensures list parsing
 
-
 class Transcript(BaseModel):
-    conversation_turn_metrics: Optional[str] = None
-    feedback: Optional[str] = None
     message: Optional[str] = None
     role: Optional[str] = None
-    time_in_call_secs: Optional[int] = None
-    tool_calls: Optional[List] = None  # ✅ Allow None
-    tool_results: Optional[List] = None  # ✅ Allow None
-
 
 class GradeRequest(BaseModel):
     code: str

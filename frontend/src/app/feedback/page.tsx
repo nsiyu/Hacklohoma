@@ -5,59 +5,55 @@ import { useSearchParams } from 'next/navigation';
 import InterviewFeedback from '@/components/InterviewFeedback';
 import Confetti from '@/components/Confetti';
 import { ElevenLabsClient } from "elevenlabs";
+import Link from 'next/link';
 
 // Hardcoded feedback data for testing
 const mockFeedback = {
-  correctness_score: 4,
-  syntax_score: 5,
-  completeness_score: 3,
-  optimality_score: 4,
-  total_score: 16, // New field for total score
-  percentile: 85, // New field for percentile ranking
-  interview_duration: "45 minutes", // New field for interview duration
-  question_difficulty: "Medium", // New field for question difficulty
+  software_engineer_code_feedback: {
+    correctness_score: 4,
+    syntax_score: 5,
+    completeness_score: 3,
+    optimality_score: 4
+  },
+  software_engineer_future_plan_feedback: {
+    key_strengths: [
+      "Problem Understanding",
+      "Code organization",
+      "Communication skills",
+      "Debugging approach"
+    ],
+    area_to_focus: [
+      "Edge case handling",
+      "Initial solution optimization",
+      "Time complexity analysis",
+      "Solution planning"
+    ],
+    recommended_practice_topics: [
+      "Two Pointers",
+      "Array Manipulation",
+      "Space-Time Tradeoffs",
+      "Edge Cases"
+    ],
+    improvement_feedback_plan: [
+      "Take more time to plan before coding",
+      "Practice more edge cases",
+      "Work on optimizing initial solutions",
+      "Be proactive in complexity discussions"
+    ]
+  },
   interview_feedback: `Your solution correctly handles the core requirements of the problem. The algorithm demonstrates a good understanding of array manipulation and the two-pointer technique. The edge cases are well-handled, particularly for empty arrays and single-element inputs.
 
 The time complexity of O(n) is appropriate for this problem, and the space complexity of O(1) is optimal.`,
-
   behavioral_feedback: `Throughout the interview, you maintained clear communication and effectively explained your thought process. You asked clarifying questions before diving into the solution, which is a positive sign.
 
-You handled hints well and remained composed when debugging the initial implementation. Your ability to think aloud while coding helped demonstrate your problem-solving approach.`,
-
-  improvement_feedback: `Consider the following areas for improvement:
-
-1. Take more time to plan before coding - writing down the approach could help organize thoughts better
-2. Practice more edge cases, especially for input validation
-3. Work on optimizing the initial solution before being prompted
-4. Could be more proactive in discussing time/space complexity tradeoffs`,
-
-  key_strengths: [ // New field for key strengths
-    "Problem understanding",
-    "Code organization",
-    "Communication skills",
-    "Debugging approach"
-  ],
-
-  areas_to_focus: [
-    "Edge case handling",
-    "Initial solution optimization",
-    "Time complexity analysis",
-    "Solution planning"
-  ],
-
-  recommended_topics: [
-    "Two Pointers",
-    "Array Manipulation",
-    "Space-Time Tradeoffs",
-    "Edge Cases"
-  ]
+You handled hints well and remained composed when debugging the initial implementation. Your ability to think aloud while coding helped demonstrate your problem-solving approach.`
 };
 
 interface InterviewData {
   question: {
     title: string;
     description: string;
-    difficulty: string;
+    difficulty: "medium";
     examples: {
       input: string;
       output: string;
@@ -66,7 +62,15 @@ interface InterviewData {
     constraints: string[];
   };
   code: string;
-  transcript: any;
+  transcript: {
+    conversation_turn_metrics: string | null;
+    feedback: string | null;
+    message: string | null;
+    role: string | null;
+    time_in_call_secs: number | null;
+    tool_calls: any[] | null;
+    tool_results: any[] | null;
+  }[];
 }
 
 const FeedbackPage = () => {
@@ -92,7 +96,18 @@ const FeedbackPage = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            code: data.code,
+            question: {
+              ...data.question,
+              difficulty: "medium"
+            },
+            transcripts: data.transcript.map(transcript => ({
+              message: transcript.message,
+              role: transcript.role,
+              time_in_call_secs: 120
+            }))
+          }),
         });
 
         if (!response.ok) {
@@ -100,6 +115,7 @@ const FeedbackPage = () => {
         }
 
         const feedbackData = await response.json();
+        console.log('Feedback data:', feedbackData);
         setFeedback(feedbackData);
       } catch (error) {
         console.error('Error fetching feedback:', error);
@@ -171,6 +187,11 @@ const FeedbackPage = () => {
       </div>
     );
   }
+
+  const totalScore = ((feedback.software_engineer_code_feedback.correctness_score + 
+    feedback.software_engineer_code_feedback.syntax_score + 
+    feedback.software_engineer_code_feedback.completeness_score + 
+    feedback.software_engineer_code_feedback.optimality_score) / 20) * 100;
 
   return (
     <>

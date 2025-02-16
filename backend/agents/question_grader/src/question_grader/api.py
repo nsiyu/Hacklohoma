@@ -25,7 +25,6 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-
 class QuestionRequest(BaseModel):
     topic: str
     difficulty: str = "medium"
@@ -62,6 +61,5 @@ async def generate_question(request: GradeRequest):
         raise HTTPException(
             status_code=500, detail=f"Failed to create question: {str(e)}"
         )
-
 
 # uvicorn question_creator.api:app --reload

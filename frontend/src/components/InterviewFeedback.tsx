@@ -4,24 +4,37 @@ import { ArrowLeftIcon, ShareIcon, DocumentDownloadIcon } from '@heroicons/react
 import Link from 'next/link';
 
 interface FeedbackScores {
-  correctness_score: number;
-  syntax_score: number;
-  completeness_score: number;
-  optimality_score: number;
-  total_score: number;
-  percentile: number;
-  interview_duration: string;
-  question_difficulty: string;
+  software_engineer_code_feedback: {
+    correctness_score: number;
+    syntax_score: number;
+    completeness_score: number;
+    optimality_score: number;
+  };
+  software_engineer_future_plan_feedback: {
+    key_strengths: string[];
+    area_to_focus: string[];
+    recommended_practice_topics: string[];
+    improvement_feedback_plan: string[];
+  };
   interview_feedback: string;
   behavioral_feedback: string;
-  improvement_feedback: string;
-  key_strengths: string[];
-  areas_to_focus: string[];
-  recommended_topics: string[];
 }
 
 interface InterviewData {
-  // Add any necessary properties for the interview data
+  question: {
+    title: string;
+    description: string;
+    difficulty: string;
+    examples: {
+      input: string;
+      output: string;
+      explanation: string;
+    }[];
+    constraints: string[];
+  };
+  transcript: {
+    time_in_call_secs: number | null;
+  }[];
 }
 
 interface InterviewFeedbackProps {
@@ -30,8 +43,8 @@ interface InterviewFeedbackProps {
 }
 
 const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) => {
-  const totalScore = ((feedback.correctness_score + feedback.syntax_score + 
-    feedback.completeness_score + feedback.optimality_score) / 20) * 100;
+  const totalScore = ((feedback.software_engineer_code_feedback.correctness_score + feedback.software_engineer_code_feedback.syntax_score + 
+    feedback.software_engineer_code_feedback.completeness_score + feedback.software_engineer_code_feedback.optimality_score) / 20) * 100;
 
   const ScoreIndicator = ({ score }: { score: number }) => (
     <div className="flex gap-0.5">
@@ -83,29 +96,28 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
                 <span className="text-3xl font-bold text-emerald-600">{totalScore.toFixed(1)}%</span>
                 <span className="text-sm text-gray-500 font-medium">Overall Score</span>
               </div>
-              <div className="mt-1 text-sm text-gray-600">
-                Percentile Rank: {feedback.percentile}%
-              </div>
             </div>
             
             <div className="p-6">
               <div className="text-sm font-medium text-gray-500 mb-1">Question Level</div>
-              <div className="flex items-center gap-2">
-                <span className={`px-2.5 py-1 rounded-full text-sm font-medium ${
-                  feedback.question_difficulty.toLowerCase() === 'easy' 
-                    ? 'bg-green-100 text-green-700'
-                    : feedback.question_difficulty.toLowerCase() === 'medium'
-                    ? 'bg-yellow-100 text-yellow-700'
-                    : 'bg-red-100 text-red-700'
-                }`}>
-                  {feedback.question_difficulty}
-                </span>
+              <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                interviewData.question.difficulty.toLowerCase() === 'easy' 
+                  ? 'bg-green-100 text-green-700'
+                  : interviewData.question.difficulty.toLowerCase() === 'medium'
+                  ? 'bg-yellow-100 text-yellow-700'
+                  : 'bg-red-100 text-red-700'
+              }`}>
+                {interviewData.question.difficulty.charAt(0).toUpperCase() + 
+                 interviewData.question.difficulty.slice(1)}
               </div>
             </div>
             
             <div className="p-6">
               <div className="text-sm font-medium text-gray-500 mb-1">Duration</div>
-              <div className="text-gray-900">{feedback.interview_duration}</div>
+              <div className="text-lg font-semibold text-gray-900">
+                {Math.round(interviewData.transcript.reduce((max, t) => 
+                  Math.max(max, t.time_in_call_secs || 0), 0) / 60)} mins
+              </div>
             </div>
           </div>
         </div>
@@ -121,28 +133,28 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
                     <div className="font-medium text-gray-900">Algorithm Correctness</div>
                     <div className="text-sm text-gray-500">Solution meets requirements</div>
                   </div>
-                  <ScoreIndicator score={feedback.correctness_score} />
+                  <ScoreIndicator score={feedback.software_engineer_code_feedback.correctness_score} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium text-gray-900">Code Syntax</div>
                     <div className="text-sm text-gray-500">Code quality and readability</div>
                   </div>
-                  <ScoreIndicator score={feedback.syntax_score} />
+                  <ScoreIndicator score={feedback.software_engineer_code_feedback.syntax_score} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium text-gray-900">Solution Completeness</div>
                     <div className="text-sm text-gray-500">Implementation thoroughness</div>
                   </div>
-                  <ScoreIndicator score={feedback.completeness_score} />
+                  <ScoreIndicator score={feedback.software_engineer_code_feedback.completeness_score} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium text-gray-900">Code Optimality</div>
                     <div className="text-sm text-gray-500">Efficiency and optimization</div>
                   </div>
-                  <ScoreIndicator score={feedback.optimality_score} />
+                  <ScoreIndicator score={feedback.software_engineer_code_feedback.optimality_score} />
                 </div>
               </div>
             </div>
@@ -150,7 +162,7 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Key Strengths</h2>
               <div className="flex flex-wrap gap-2">
-                {feedback.key_strengths.map((strength, index) => (
+                {feedback.software_engineer_future_plan_feedback.key_strengths.map((strength, index) => (
                   <span key={index} className="px-3 py-1 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-full">
                     {strength}
                   </span>
@@ -161,7 +173,7 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Areas to Focus</h2>
               <div className="flex flex-wrap gap-2">
-                {feedback.areas_to_focus.map((area, index) => (
+                {feedback.software_engineer_future_plan_feedback.area_to_focus.map((area, index) => (
                   <span key={index} className="px-3 py-1 bg-amber-50 text-amber-700 text-sm font-medium rounded-full">
                     {area}
                   </span>
@@ -184,7 +196,7 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
 
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Improvement Plan</h2>
-              <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">{feedback.improvement_feedback}</p>
+              <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">{feedback.software_engineer_future_plan_feedback.improvement_feedback_plan}</p>
             </div>
           </div>
         </div>
@@ -193,7 +205,7 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
         <div className="mt-8 bg-gradient-to-r from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200 shadow-sm">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Recommended Practice Topics</h2>
           <div className="flex flex-wrap gap-3">
-            {feedback.recommended_topics.map((topic, index) => (
+            {feedback.software_engineer_future_plan_feedback.recommended_practice_topics.map((topic, index) => (
               <Link 
                 key={index}
                 href={`/catalog?topic=${topic}`}
