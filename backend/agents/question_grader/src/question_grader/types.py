@@ -16,10 +16,12 @@ class CodingQuestionRequest(BaseModel):
     difficulty: Optional[str] = Field(
         description="Difficulty level: easy, medium, or hard"
     )
-    examples: Optional[List[Example]] = Field(description="List of example cases")
+    examples: Optional[List[Example]] = Field(
+        default_factory=list
+    )  # ✅ Ensures list parsing
     constraints: Optional[List[str]] = Field(
-        description="List of constraints for the problem"
-    )
+        default_factory=list
+    )  # ✅ Ensures list parsing
 
 
 class Transcript(BaseModel):
@@ -27,12 +29,12 @@ class Transcript(BaseModel):
     feedback: Optional[str] = None
     message: Optional[str] = None
     role: Optional[str] = None
-    time_in_call_secs: Optional[str] = None
-    tool_calls: Optional[str] = None
-    tool_results: Optional[List] = None
+    time_in_call_secs: Optional[int] = None
+    tool_calls: Optional[List] = None  # ✅ Allow None
+    tool_results: Optional[List] = None  # ✅ Allow None
 
 
 class GradeRequest(BaseModel):
     code: str
     question: CodingQuestionRequest
-    transcript: List[Transcript]
+    transcripts: List[Transcript]
