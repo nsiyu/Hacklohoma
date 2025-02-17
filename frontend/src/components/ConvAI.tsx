@@ -17,6 +17,7 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [conversation, setConversation] = useState<any>(null);
   const [knowledgeBaseId, setKnowledgeBaseId] = useState<string | null>(null);
   const isConnectedRef = useRef(false);
@@ -79,6 +80,24 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
     }, 10000),
     [question, knowledgeBaseId]
   );
+
+  const redirectToFeedback = (conversationId: string) => {
+    const interviewData = {
+      question: {
+        title: question?.title,
+        description: question?.description,
+        difficulty: question?.difficulty,
+        examples: question?.examples,
+        constraints: question?.constraints
+      },
+      code: currentCode,
+      transcript: conversationId
+    };
+    
+    console.log('Redirecting with interview data:', interviewData);
+    const encodedData = encodeURIComponent(JSON.stringify(interviewData));
+    window.location.href = `/feedback?data=${encodedData}`;
+  };
 
   useEffect(() => {
     debouncedUpdateKnowledgeBase(currentCode);
@@ -198,31 +217,10 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
         },
         onDisconnect: async () => {
           console.log('Disconnecting conversation');
+          
+          // If conversation isn't already ending, trigger endConversation
           if (!isEndingRef.current) {
             await endConversation();
-            return;
-          }
-          setIsConnected(false);
-          setIsSpeaking(false);
-          
-          // Get the data ready for redirection
-          const conversationId = conversationRef.current?.getId();
-          if (conversationId) {
-            const interviewData = {
-              question: {
-                title: question?.title,
-                description: question?.description,
-                difficulty: question?.difficulty,
-                examples: question?.examples,
-                constraints: question?.constraints
-              },
-              code: currentCode,
-              transcript: conversationId
-            };
-            
-            console.log('Redirecting with interview data:', interviewData);
-            const encodedData = encodeURIComponent(JSON.stringify(interviewData));
-            window.location.href = `/feedback?data=${encodedData}`;
           }
         },
         onError: (error) => {
@@ -260,35 +258,26 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
 
   async function endConversation() {
     console.log('Starting end conversation process');
+    
     const currentConversation = conversationRef.current;
     if (!currentConversation) {
       console.log('No conversation found');
       return;
     }
-
-    // Set the ending flags first, before any async operations
+  
+    // Set the ending flags to prevent duplicate cleanup
+    if (isEndingRef.current) {
+      console.log('Conversation already ending');
+      return;
+    }
+  
+    setIsRedirecting(true);
     setIsEnding(true);
     isEndingRef.current = true;
-
+  
     try {
       const conversationId = currentConversation.getId();
-      console.log('Ending conversation ID:', conversationId);
-
-      const interviewData = {
-        question: {
-          title: question?.title,
-          description: question?.description,
-          difficulty: question?.difficulty,
-          examples: question?.examples,
-          constraints: question?.constraints
-        },
-        code: currentCode,
-        transcript: conversationId
-      };
-
-      console.log('Prepared interview data:', interviewData);
-      const encodedData = encodeURIComponent(JSON.stringify(interviewData));
-
+  
       // Clean up knowledge base
       try {
         await client.conversationalAi.updateAgent(
@@ -306,23 +295,31 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
       } catch (error) {
         console.error('Error updating agent:', error);
       }
-
+  
       await removeFromKnowledgeBase();
       
+      // Update UI state
+      setIsConnected(false);
+      setIsSpeaking(false);
+      setConversationAndRef(null);
+  
       // End the session
       console.log('Ending session...');
       await currentConversation.endSession();
-      setConversationAndRef(null);
-
-      // Redirect immediately after ending the session
-      console.log('Redirecting to feedback page...');
-      window.location.href = `/feedback?data=${encodedData}`;
+  
+      // Redirect to feedback
+      redirectToFeedback(conversationId);
     } catch (error) {
       console.error('Error in end conversation process:', error);
-      isEndingRef.current = false;
+      // Reset the ending flags and UI state if there was an error
       setIsEnding(false);
+      isEndingRef.current = false;
+      setIsConnected(false);
+      setIsSpeaking(false);
+      setIsRedirecting(false);
     }
   }
+  
 
   const setConversationAndRef = (newConversation: any) => {
     setConversation(newConversation);
@@ -331,7 +328,7 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
 
   return (
     <>
-      {!isConnected && !isLoading && question && (
+      {!isConnected && !isLoading && !isRedirecting && question && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8">
             <div className="text-center mb-6">
