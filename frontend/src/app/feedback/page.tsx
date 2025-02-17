@@ -5,9 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import InterviewFeedback from '@/components/InterviewFeedback';
 import Confetti from '@/components/Confetti';
 import { ElevenLabsClient } from "elevenlabs";
-import Link from 'next/link';
 
-// Hardcoded feedback data for testing
 const mockFeedback = {
   software_engineer_code_feedback: {
     correctness_score: 4,
@@ -186,11 +184,6 @@ const FeedbackPage = () => {
       </div>
     );
   }
-
-  const totalScore = ((feedback.software_engineer_code_feedback.correctness_score + 
-    feedback.software_engineer_code_feedback.syntax_score + 
-    feedback.software_engineer_code_feedback.completeness_score + 
-    feedback.software_engineer_code_feedback.optimality_score) / 20) * 100;
 
   return (
     <>

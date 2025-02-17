@@ -16,8 +16,6 @@ type InterviewTranscriptMessage = {
   content: string;
 };
 
-
-
 enum EngingeeringLevel {
   E1 = "E1", 
   E2 = "E2", 
@@ -31,20 +29,6 @@ enum EngingeeringLevel {
   IC4 = "IC4",
 }
 
-// export const levelToDifficulty: Record <EngingeeringLevel, Difficulty> = {
-//   [EngingeeringLevel.E1]: Difficulty.Easy,
-//   [EngingeeringLevel.E2]: Difficulty.Medium,
-//   [EngingeeringLevel.E3]: Difficulty.Medium,
-//   [EngingeeringLevel.E4]: Difficulty.Hard,
-//   [EngingeeringLevel.E5]: Difficulty.Hard,
-//   [EngingeeringLevel.IC0]: Difficulty.Easy,
-//   [EngingeeringLevel.IC1]: Difficulty.Medium,
-//   [EngingeeringLevel.IC2]: Difficulty.Medium,
-//   [EngingeeringLevel.IC3]: Difficulty.Medium,
-//   [EngingeeringLevel.IC4]: Difficulty.Hard,
-// }
-
-
 interface QuestionRequest {
   topic?: Topic;
   difficulty?: string;
@@ -54,5 +38,20 @@ interface QuestionRequest {
   test_cases?: boolean;
 }
 
-export {Topic, Difficulty, QuestionRequest, InterviewQuestion, InterviewTranscriptMessage };
-
+interface InterviewData {
+  question: {
+    title: string;
+    description: string;
+    difficulty: string;
+    examples: {
+      input: string;
+      output: string;
+      explanation: string;
+    }[];
+    constraints: string[];
+  };
+  transcript: {
+    time_in_call_secs: number | null;
+  }[];
+}
+export {Topic, Difficulty, QuestionRequest, InterviewQuestion, InterviewTranscriptMessage, InterviewData };

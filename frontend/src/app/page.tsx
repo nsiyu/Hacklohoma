@@ -86,7 +86,6 @@ const Home = () => {
         </div>
 
         <div className="relative container mx-auto mt-12 px-4">
-          <VideoEditor />
         </div>
       </div>
     </div>
