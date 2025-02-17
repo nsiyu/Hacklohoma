@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { InterviewQuestion, InterviewTranscriptMessage } from '@/types/Interview';
+import { InterviewQuestion } from '@/types/Interview';
 import { QuestionRequest } from '@/types/Interview';
 
 enum Topic {
@@ -34,15 +34,6 @@ const fetchQuestion = async (params: QuestionRequest) => {
     console.error('Error details:', error);
     throw error;
   }
-};
-
-const transformTranscript = (apiTranscript: any[]): InterviewTranscriptMessage[] => {
-  return apiTranscript
-    .filter(msg => msg.message && typeof msg.message === 'string' && msg.role !== null)
-    .map(msg => ({
-      role: msg.role === 'agent' ? 'assistant' : 'user',
-      content: msg.message
-    }));
 };
 
 interface SidebarProps {

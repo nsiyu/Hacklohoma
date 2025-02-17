@@ -2,45 +2,7 @@
 
 import { ArrowLeftIcon, ShareIcon, DocumentDownloadIcon } from '@heroicons/react/outline';
 import Link from 'next/link';
-
-interface FeedbackScores {
-  software_engineer_code_feedback: {
-    correctness_score: number;
-    syntax_score: number;
-    completeness_score: number;
-    optimality_score: number;
-  };
-  software_engineer_future_plan_feedback: {
-    key_strengths: string[];
-    area_to_focus: string[];
-    recommended_practice_topics: string[];
-    improvement_feedback_plan: string[];
-  };
-  interview_feedback: string;
-  behavioral_feedback: string;
-}
-
-interface InterviewData {
-  question: {
-    title: string;
-    description: string;
-    difficulty: string;
-    examples: {
-      input: string;
-      output: string;
-      explanation: string;
-    }[];
-    constraints: string[];
-  };
-  transcript: {
-    time_in_call_secs: number | null;
-  }[];
-}
-
-interface InterviewFeedbackProps {
-  feedback: FeedbackScores;
-  interviewData: InterviewData;
-}
+import { InterviewFeedbackProps } from '@/types/Feedback';
 
 const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) => {
   const totalScore = ((feedback.software_engineer_code_feedback.correctness_score + feedback.software_engineer_code_feedback.syntax_score + 
@@ -61,7 +23,6 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Sticky Header */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4 flex items-center justify-between">
@@ -88,7 +49,6 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Modified Overview Score Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-8">
           <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
             <div className="p-6">
@@ -115,7 +75,7 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
             <div className="p-6">
               <div className="text-sm font-medium text-gray-500 mb-1">Duration</div>
               <div className="text-lg font-semibold text-gray-900">
-                {Math.round(interviewData.transcript.reduce((max, t) => 
+                {Math.round(interviewData.transcript.reduce((max: number, t: { time_in_call_secs?: number }) => 
                   Math.max(max, t.time_in_call_secs || 0), 0) / 60)} mins
               </div>
             </div>
@@ -123,7 +83,6 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
         </div>
 
         <div className="grid grid-cols-12 gap-6">
-          {/* Left Column - Performance Metrics */}
           <div className="col-span-12 lg:col-span-4 space-y-4">
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Performance Metrics</h2>
@@ -182,7 +141,6 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
             </div>
           </div>
 
-          {/* Right Column - Detailed Feedback */}
           <div className="col-span-12 lg:col-span-8 space-y-4">
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Technical Performance</h2>
@@ -210,7 +168,6 @@ const InterviewFeedback = ({ feedback, interviewData }: InterviewFeedbackProps) 
           </div>
         </div>
 
-        {/* Practice Recommendations */}
         <div className="mt-8 bg-gradient-to-r from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200 shadow-sm">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Recommended Practice Topics</h2>
           <div className="flex flex-wrap gap-3">
