@@ -6,14 +6,14 @@ const Home = () => {
   return (
     <div className="min-h-screen text-gray-900 relative overflow-x-hidden overflow-hidden font-montserrat overscroll-none bg-white">
       <div className="fixed inset-0 -z-10">
-        <div className="inset-0 bg-[radial-gradient(ellipse_at_top,rgba(224,242,254,0.5)_0%,transparent_50%)] h-screen sticky top-0"></div>
-        <div className="inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(220,252,231,0.4)_0%,transparent_50%)] h-screen sticky top-0"></div>
-        <div className="top-20 left-10 w-72 h-72 bg-emerald-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob sticky"></div>
-        <div className="top-40 right-10 w-72 h-72 bg-green-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 sticky"></div>
-        <div className="-bottom-8 left-20 w-72 h-72 bg-teal-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000 sticky"></div>
+        <div className="inset-0 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.1)_0%,transparent_50%)] h-screen sticky top-0"></div>
+        <div className="inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(5,150,105,0.1)_0%,transparent_50%)] h-screen sticky top-0"></div>
+        <div className="top-20 left-10 w-72 h-72 bg-emerald-100/50 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob sticky"></div>
+        <div className="top-40 right-10 w-72 h-72 bg-emerald-200/50 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 sticky"></div>
+        <div className="-bottom-8 left-20 w-72 h-72 bg-emerald-300/50 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000 sticky"></div>
       </div>
 
-      <nav className="relative py-4 z-50 border-b">
+      <nav className="relative py-4 z-50 border-b border-gray-200">
         <div className="container mx-auto max-w-7xl px-4">
           <div className="flex items-center justify-between px-8 py-4">
             <div className="flex items-center space-x-8">
@@ -24,13 +24,13 @@ const Home = () => {
                   <path d="M15 9L13 11.5L15 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <div className="flex">
-                  <span className="text-gray-900 transition-colors duration-300">Cortex</span>
+                  <span className="text-gray-900 transition-colors duration-300">Atlas</span>
                 </div>
                 <span className="absolute -inset-x-4 -inset-y-1 group-hover:bg-emerald-50 rounded-lg transition-colors duration-300 -z-10"></span>
               </Link>
             </div>
             <div className="flex items-center space-x-6">
-              <button className="text-gray-700 hover:text-emerald-600 font-medium transition-all duration-200 px-2 py-1 rounded-lg hover:bg-emerald-50">
+              <button className="text-gray-600 hover:text-emerald-600 font-medium transition-all duration-200 px-2 py-1 rounded-lg hover:bg-emerald-50">
                 Log in
               </button>
               <button className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-medium py-2 px-5 rounded-lg transition-all duration-200 shadow-md shadow-emerald-200 hover:shadow-lg hover:shadow-emerald-300 transform hover:-translate-y-0.5">
@@ -47,14 +47,13 @@ const Home = () => {
             <div className="w-24 h-24 bg-emerald-50 rounded-lg rotate-12 animate-float"></div>
           </div>
           <div className="absolute right-10 bottom-1/4">
-            <div className="w-16 h-16 bg-green-50 rounded-full animate-float animation-delay-2000"></div>
+            <div className="w-16 h-16 bg-emerald-100 rounded-full animate-float animation-delay-2000"></div>
           </div>
           
           <div className="text-center max-w-3xl">
             <h1 className="text-5xl font-bold text-gray-900 mb-6 tracking-tight">
-              <span className="  relative inline-block group">
+              <span className="relative inline-block group">
                 Ace
-      
               </span>
               {' '}Your Technical Interviews
             </h1>
@@ -83,9 +82,6 @@ const Home = () => {
               <Image src="/logos/google.png" alt="Google" width={100} height={28} className="h-7 w-auto object-contain" />
             </div>
           </div>
-        </div>
-
-        <div className="relative container mx-auto mt-12 px-4">
         </div>
       </div>
     </div>

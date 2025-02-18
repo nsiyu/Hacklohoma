@@ -78,13 +78,25 @@ const FeedbackPage = () => {
   const [feedback, setFeedback] = useState<any>(null);
   const searchParams = useSearchParams();
 
-  const getTranscript = async (conversationId: string) => {
-    const finalClient = new ElevenLabsClient({ 
-      apiKey: process.env.NEXT_PUBLIC_ELEVEN_LABS_API_KEY as string 
-    });
-    const response = await finalClient.conversationalAi.getConversation(conversationId);
-    return response.transcript;
-  }
+  const getTranscript = async (conversationId: string, retryCount = 0): Promise<any> => {
+    const maxRetries = 3;
+    const retryDelay = 2000;
+
+    try {
+      const finalClient = new ElevenLabsClient({ 
+        apiKey: process.env.NEXT_PUBLIC_ELEVEN_LABS_API_KEY as string 
+      });
+      const response = await finalClient.conversationalAi.getConversation(conversationId);
+      return response.transcript;
+    } catch (error) {
+      if (retryCount < maxRetries) {
+        console.log(`Retry attempt ${retryCount + 1} for conversation ${conversationId}`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return getTranscript(conversationId, retryCount + 1);
+      }
+      throw error;
+    }
+  };
 
   useEffect(() => {
     const fetchFeedback = async (data: InterviewData) => {
@@ -112,7 +124,6 @@ const FeedbackPage = () => {
         }
 
         const feedbackData = await response.json();
-        console.log('Feedback data:', feedbackData);
         setFeedback(feedbackData);
       } catch (error) {
         console.error('Error fetching feedback:', error);
@@ -122,34 +133,40 @@ const FeedbackPage = () => {
       }
     };
 
-    try {
-      const encodedData = searchParams.get('data');
-      if (encodedData) {
-        const decodedData = JSON.parse(decodeURIComponent(encodedData));
-        console.log('Decoded data:', decodedData);
-        const conversationId = decodedData.transcript;
-        if (conversationId) {
-          getTranscript(conversationId)
-            .then(transcriptData => {
+    const initializeData = async () => {
+      try {
+        const encodedData = searchParams.get('data');
+        if (encodedData) {
+          const decodedData = JSON.parse(decodeURIComponent(encodedData));
+          const conversationId = decodedData.transcript;
+          
+          if (conversationId) {
+            // Add initial delay before first attempt
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            try {
+              const transcriptData = await getTranscript(conversationId);
               decodedData.transcript = transcriptData;
-              console.log('Decoded data:', decodedData);
               setInterviewData(decodedData);
-              fetchFeedback(decodedData);
-            })
-            .catch(error => {
-              console.error('Error fetching final transcript:', error);
+              await fetchFeedback(decodedData);
+            } catch (error) {
+              console.error('Error fetching transcript after retries:', error);
+              // Fallback to proceeding without transcript
               setInterviewData(decodedData);
-              fetchFeedback(decodedData);
-            });
-          return;
+              await fetchFeedback(decodedData);
+            }
+          } else {
+            setInterviewData(decodedData);
+            await fetchFeedback(decodedData);
+          }
         }
-        setInterviewData(decodedData);
-        fetchFeedback(decodedData);
+      } catch (error) {
+        console.error('Error parsing interview data:', error);
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error parsing interview data:', error);
-      setIsLoading(false);
-    }
+    };
+
+    initializeData();
   }, [searchParams]);
 
   useEffect(() => {

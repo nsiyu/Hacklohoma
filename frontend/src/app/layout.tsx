@@ -1,31 +1,22 @@
-import { Montserrat } from 'next/font/google';
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
 
-const montserrat = Montserrat({ 
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-montserrat',
-});
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Cortex",
-  description: "Master Your Technical Interviews",
-  icons: {
-    icon: '/logos/codem.svg',
-  },
-};
+  title: 'Atlas - AI Technical Interview Practice',
+  description: 'Practice technical interviews with our AI-powered interview simulator',
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={montserrat.variable}>
-      <body className={`${montserrat.className}`}>
-        {children}
-      </body>
+    <html lang="en">
+      <body className={`${inter.className} bg-white text-gray-900`}>{children}</body>
     </html>
-  );
+  )
 }

@@ -13,125 +13,82 @@ interface ConvAIProps {
   onTranscriptUpdate: (message: any) => void;
 }
 
-
 const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate }: ConvAIProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
   const [conversation, setConversation] = useState<any>(null);
-  const [questionKbId, setQuestionKbId] = useState<string | null>(null);
-  const [codeKbId, setCodeKbId] = useState<string | null>(null);
-
+  const [knowledgeBaseId, setKnowledgeBaseId] = useState<string | null>(null);
   const isConnectedRef = useRef(false);
   const conversationRef = useRef<any>(null);
+  const [isEnding, setIsEnding] = useState(false);
   const isEndingRef = useRef(false);
 
   const client = new ElevenLabsClient({ 
     apiKey: process.env.NEXT_PUBLIC_ELEVEN_LABS_API_KEY as string 
   });
 
-  const addContentToKnowledgeBaseAsText = async (content: string, filename: string) => {
-    try {
-      console.log(`Adding ${filename}.txt to knowledge base...`);
-
-      if (content.length > 100000) {
-        console.error('Content too large for knowledge base');
-        return;
-      }
-
-      const kb_file = new File(
-        [content],
-        `${filename}.txt`,
-        { type: 'text/plain' }
-      );
-
-      let response = await client.conversationalAi.addToKnowledgeBase({
-        file: kb_file
-      }); 
-
-      if (!response || !response.id) {
-        console.error(`Invalid response from knowledge base for adding ${filename}.txt`);
-        return;
-      } 
-      console.log(`${filename}.txt added to knowledge base with ID: ${response.id}`)
-      return response.id; 
-    } catch (error) {
-      console.error(`Error adding ${filename} to knowledge base:`, error);
-      return null;
-    }
-  }
-
   const debouncedUpdateKnowledgeBase = useCallback(
     debounce(async (code: string) => {
       if (!code.trim()) return;
-      console.log('Updating knowledge base content with new code...');
-      try {
 
-        const new_code_kb_id = await addContentToKnowledgeBaseAsText(code, "code");
-          if (new_code_kb_id) {
-            if (codeKbId){
-              await removeFromKnowledgeBase("code");
-            }   
-            setCodeKbId(new_code_kb_id)
-            await updateAgentWithKnowledgeBaseInfo();
+      try {
+        let questionResponse = null;
+        if (question) {
+          console.log('Adding question to knowledge base...');
+          const questionContent = [
+            `Title: ${question.title}`,
+            `Description: ${question.description}`,
+            'Examples:',
+            ...question.examples.map((example, index) => 
+              `Example ${index + 1}:\n` +
+              `Input: ${example.input}\n` +
+              `Output: ${example.output}\n` +
+              `Explanation: ${example.explanation}`
+            ),
+            'Constraints:',
+            ...question.constraints.map(constraint => `- ${constraint}`)
+          ].join('\n\n');
+
+          const questionFile = new File(
+            [questionContent],
+            'interview_question.txt',
+            { type: 'text/plain' }
+          );
+
+          questionResponse = await client.conversationalAi.addToKnowledgeBase({
+            file: questionFile
+          });
+
+          if (!questionResponse || !questionResponse.id) {
+            console.error('Invalid response from knowledge base for question');
+            return;
           }
-     
+          console.log('Question added to knowledge base with ID:', questionResponse.id);
+        }
+
+        if (knowledgeBaseId) {
+          console.log('Cleaning up old knowledge base:', knowledgeBaseId);
+          await removeFromKnowledgeBase();
+        }
+        
+        console.log('Fetching updated knowledge base content...');
       } catch (error) {
         console.error('Error updating knowledge base:', error);
       }
-    }, 3000),
-    [codeKbId]
+    }, 10000),
+    [question, knowledgeBaseId]
   );
 
-  const redirectToFeedback = (conversationId: string) => {
-    const interviewData = {
-      question: {
-        title: question?.title,
-        description: question?.description,
-        difficulty: question?.difficulty,
-        examples: question?.examples,
-        constraints: question?.constraints
-      },
-      code: currentCode,
-      transcript: conversationId
-    };
-    
-    console.log('Redirecting with interview data:', interviewData);
-    const encodedData = encodeURIComponent(JSON.stringify(interviewData));
-    //window.location.href = `/feedback?data=${encodedData}`;
-  };
+  useEffect(() => {
+    debouncedUpdateKnowledgeBase(currentCode);
+  }, [currentCode, debouncedUpdateKnowledgeBase]);
 
-  const updateAgentWithKnowledgeBaseInfo = async (name: string, kb_id: string) => {
-    const updateAgentPayload = {
-      conversation_config: {
-        agent: {
-          prompt: {
-            knowledge_base: [{
-              type: 'file' as const,
-              name: name,
-              id: kb_id
-            }]
-          }
-        }
-      }
-    };
-  
-    const response = await client.conversationalAi.updateAgent(
-      process.env.NEXT_PUBLIC_AGENT_ID as string,
-      updateAgentPayload
-    );
-
-    if (response) {
-      console.log("Updated the agent", response)
-    }
-  };
-
-  async function addQuestionToKnowledgeBase() {
+  async function addToKnowledgeBase() {
     if (!question) return false;
 
     try {
-      const questionContent = [
+      const textContent = [
         `Title: ${question.title}`,
         `Description: ${question.description}`,
         'Examples:',
@@ -145,38 +102,54 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
         ...question.constraints.map(constraint => `- ${constraint}`)
       ].join('\n\n');
 
-      const question_kb_id = await addContentToKnowledgeBaseAsText(questionContent, "question");
-      if (!question_kb_id) {
-        return false; 
+      if (textContent.length > 100000) {
+        console.error('Content too large for knowledge base');
+        return false;
       }
 
-      setQuestionKbId(question_kb_id);
+      const file = new File(
+        [textContent], 
+        'question.txt', 
+        { type: 'text/plain' }
+      );
+
       try {
-        
-        // const updateAgentPayload = {
-        //   conversation_config: {
-        //     agent: {
-        //       prompt: {
-        //         knowledge_base: [{
-        //           type: 'file' as const,
-        //           name: 'interview_question',
-        //           id: question_kb_id
-        //         }]
-        //       }
-        //     }
-        //   }
-        // };
+        const response = await client.conversationalAi.addToKnowledgeBase({
+          file
+        });
 
-        // const response = await client.conversationalAi.updateAgent(
-        //   process.env.NEXT_PUBLIC_AGENT_ID as string,
-        //   updateAgentPayload
-        // );
+        if (!response || !response.id) {
+          console.error('Invalid response from knowledge base');
+          return false;
+        }
 
-        await updateAgentWithKnowledgeBaseInfo("question", question_kb_id);
-        await addContentToKnowledgeBaseAsText("whyyyyy", "testtfile");
+        setKnowledgeBaseId(response.id);
+
+        const updateAgentPayload = {
+          conversation_config: {
+            agent: {
+              prompt: {
+                knowledge_base: [{
+                  type: 'file' as const,
+                  name: 'interview_question',
+                  id: response.id
+                }]
+              }
+            }
+          }
+        };
+
+        await client.conversationalAi.updateAgent(
+          process.env.NEXT_PUBLIC_AGENT_ID as string,
+          updateAgentPayload
+        );
+
         return true;
       } catch (apiError) {
         console.error('ElevenLabs API error:', apiError);
+        if (knowledgeBaseId) {
+          await removeFromKnowledgeBase();
+        }
         return false;
       }
     } catch (error) {
@@ -185,37 +158,18 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
     }
   }
 
-  async function removeFromKnowledgeBase(kb_type: "question" | "code") {
-    const kbId = kb_type === "question" ? questionKbId : codeKbId;
-  
-    if (!kbId) return;
-  
+  async function removeFromKnowledgeBase() {
+    if (!knowledgeBaseId) return;
+
     try {
-      console.log("Removing from knowledge base:", kb_type);
-      await client.conversationalAi.deleteKnowledgeBaseDocument(kbId);
-  
-      if (kb_type === "question") {
-        setQuestionKbId(null);
-      } else {
-        setCodeKbId(null);
-      }
+      console.log('Removing from knowledge base:', knowledgeBaseId);
+      // await client.conversationalAi.deleteKnowledgeBaseDocument(knowledgeBaseId);
+      setKnowledgeBaseId(null);
     } catch (error) {
-      console.error("Error removing from knowledge base:", error);
+      console.error('Error removing from knowledge base:', error);
     }
   }
 
-  useEffect(() => {
-    debouncedUpdateKnowledgeBase(currentCode);
-  }, [currentCode, debouncedUpdateKnowledgeBase]);
-
-  useEffect(() => {
-    return () => {
-      // Cleanup when component unmounts
-      if (questionKbId) removeFromKnowledgeBase("question");
-      if (codeKbId) removeFromKnowledgeBase("code");
-    };
-  }, []);
-  
   const startConversation = async () => {
     setIsLoading(true);
     
@@ -226,8 +180,8 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
       return;
     }
 
-    const questionKnowledgeBaseAdded = await addQuestionToKnowledgeBase();
-    if (!questionKnowledgeBaseAdded) {
+    const knowledgeBaseAdded = await addToKnowledgeBase();
+    if (!knowledgeBaseAdded) {
       setIsLoading(false);
       alert("Failed to prepare interview knowledge");
       return;
@@ -244,10 +198,31 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
         },
         onDisconnect: async () => {
           console.log('Disconnecting conversation');
-          
-          // If conversation isn't already ending, trigger endConversation
           if (!isEndingRef.current) {
             await endConversation();
+            return;
+          }
+          setIsConnected(false);
+          setIsSpeaking(false);
+          
+          // Get the data ready for redirection
+          const conversationId = conversationRef.current?.getId();
+          if (conversationId) {
+            const interviewData = {
+              question: {
+                title: question?.title,
+                description: question?.description,
+                difficulty: question?.difficulty,
+                examples: question?.examples,
+                constraints: question?.constraints
+              },
+              code: currentCode,
+              transcript: conversationId
+            };
+            
+            console.log('Redirecting with interview data:', interviewData);
+            const encodedData = encodeURIComponent(JSON.stringify(interviewData));
+            window.location.href = `/feedback?data=${encodedData}`;
           }
         },
         onError: (error) => {
@@ -267,8 +242,7 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
     } catch (error) {
       console.error('Error starting conversation:', error);
       alert('Failed to start conversation');
-      await removeFromKnowledgeBase("question");
-      await removeFromKnowledgeBase("code");
+      await removeFromKnowledgeBase();
     } finally {
       setIsLoading(false);
     }
@@ -286,25 +260,34 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
 
   async function endConversation() {
     console.log('Starting end conversation process');
-    
     const currentConversation = conversationRef.current;
     if (!currentConversation) {
       console.log('No conversation found');
       return;
     }
-  
-    // Set the ending flags to prevent duplicate cleanup
-    if (isEndingRef.current) {
-      console.log('Conversation already ending');
-      return;
-    }
-  
-    setIsRedirecting(true);
+
+    setIsEnding(true);
     isEndingRef.current = true;
-  
+
     try {
       const conversationId = currentConversation.getId();
-  
+      console.log('Ending conversation ID:', conversationId);
+
+      const interviewData = {
+        question: {
+          title: question?.title,
+          description: question?.description,
+          difficulty: question?.difficulty,
+          examples: question?.examples,
+          constraints: question?.constraints
+        },
+        code: currentCode,
+        transcript: conversationId
+      };
+
+      console.log('Prepared interview data:', interviewData);
+      const encodedData = encodeURIComponent(JSON.stringify(interviewData));
+
       // Clean up knowledge base
       try {
         await client.conversationalAi.updateAgent(
@@ -322,31 +305,23 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
       } catch (error) {
         console.error('Error updating agent:', error);
       }
-  
-      await removeFromKnowledgeBase("question");
-      await removeFromKnowledgeBase("code");
+
+      await removeFromKnowledgeBase();
       
-      // Update UI state
-      setIsConnected(false);
-      setIsSpeaking(false);
-      setConversationAndRef(null);
-  
       // End the session
       console.log('Ending session...');
       await currentConversation.endSession();
-  
-      // Redirect to feedback
-      redirectToFeedback(conversationId);
+      setConversationAndRef(null);
+
+      // Redirect immediately after ending the session
+      console.log('Redirecting to feedback page...');
+      window.location.href = `/feedback?data=${encodedData}`;
     } catch (error) {
       console.error('Error in end conversation process:', error);
-      // Reset the ending flags and UI state if there was an error
       isEndingRef.current = false;
-      setIsConnected(false);
-      setIsSpeaking(false);
-      setIsRedirecting(false);
+      setIsEnding(false);
     }
   }
-  
 
   const setConversationAndRef = (newConversation: any) => {
     setConversation(newConversation);
@@ -355,7 +330,7 @@ const ConvAI = ({ question, currentCode, onConversationStart, onTranscriptUpdate
 
   return (
     <>
-      {!isConnected && !isLoading && !isRedirecting && question && (
+      {!isConnected && !isLoading && question && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8">
             <div className="text-center mb-6">
